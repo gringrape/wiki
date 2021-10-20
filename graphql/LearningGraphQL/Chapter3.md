@@ -81,3 +81,120 @@ query liftAccessedByJazzCat {
   }
 }
 ```
+
+### 프래그먼트
+객체 타입에서 동일한 필드를 여러번 가져올때, 
+공통되는 필드를 묶어서 반복적인 서술을 피할 수 있다.
+
+다음 쿼리에서 Lift 정보에 관하여,
+중복된 필드를 표시해보자. 
+
+```graphql
+query {
+  Lift(id: "jazz-cat") {
+    name  //
+    status //
+    capacity //
+    night //
+    elevationGain //
+    trailAccess {
+      name
+      difficulty
+    }
+  }
+  Trail(id: "river-run") {
+    name
+    difficulty
+    accessedByLifts {
+      name //
+      status //
+      capacity //
+      night //
+      elevationGain //
+    }
+  }
+}
+```
+
+중복된 필드를 프래그먼트 단위로 묶어보자.
+
+```graphql
+fragment liftInfo on Lift {
+
+}
+
+query {
+  Lift(id: "jazz-cat") {
+    name  #
+    status #
+    capacity #
+    night #
+    elevationGain #
+    trailAccess {
+      name
+      difficulty
+    }
+  }
+  Trail(id: "river-run") {
+    name
+    difficulty
+    accessedByLifts {
+      name #
+      status #
+      capacity #
+      night #
+      elevationGain #
+    }
+  }
+}
+```
+
+다음과 같이 trail 에 대한 정보를 한 번더 추출할 수 있다. 
+
+```graphql
+fragment liftInfo on Lift {
+  name
+  status
+  capacity
+  night
+  elevationGain
+}
+
+fragment trailInfo on Trail {
+  name
+  difficulty
+}
+
+query {
+  Lift(id: "jazz-cat") {
+    ...liftInfo
+    trailAccess {
+      ...trailInfo
+    }
+  }
+  Trail(id: "river-run") {
+		...trailInfo
+    accessedByLifts {
+      ...liftInfo
+    }
+  }
+}
+```
+
+### 유니온 타입
+두 개 이상의 객체 타입을 섞어서 배열로 반환할 수 있다.
+이 경우, 인라인 프래그먼트를 활용해서, 어떤 필드를 가져올지 
+선택 할 수 있다.
+
+## 뮤테이션
+
+## 서브스크립션
+특정 객체의 셀렉션 세트를 구독하고 있는 경우, 
+서버에서는 해당 세트가 변하면 클라이언트로의 푸시가 일어나서,
+값이 전달되게 된다. 
+
+## 공통 어휘
+- Definition
+  = Fragment defintion
+  - Query definition
+- selection set  
